@@ -1,0 +1,71 @@
+@startuml
+' Set layout direction
+top to bottom direction
+
+' Include C4 Deployment and icons
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+!define FONTAWESOME5 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include FONTAWESOME5/user_shield.puml
+!include FONTAWESOME5/spider.puml
+!include FONTAWESOME5/database.puml
+!include FONTAWESOME5/cloud.puml
+!include FONTAWESOME5/user_ninja.puml
+!include FONTAWESOME5/credit_card.puml
+!include FONTAWESOME5/history.puml
+!include FONTAWESOME5/broadcast_tower.puml
+!include FONTAWESOME5/key.puml
+!include FONTAWESOME5/user_tie.puml
+
+skinparam roundcorner 20
+skinparam Padding 20
+UpdateElementStyle(node, $borderColor="#cccccc", $fontColor="#5c5c5c")
+UpdateElementStyle(container, $bgColor="#5388cb")
+
+' Set white background
+skinparam backgroundColor #FFFFFF
+
+' Set line thickness
+skinparam linetype ortho
+skinparam linetype polyline
+skinparam arrowThickness 2
+skinparam classBorderThickness 2
+skinparam componentBorderThickness 2
+skinparam objectBorderThickness 2
+skinparam packageBorderThickness 2
+
+SHOW_LEGEND()
+
+' Define nodes and containers
+Deployment_Node(ThreatActor, "Threat Actor Infrastructure", "Ducktail actor & malware delivery", $sprite="user_ninja,color=#ff0000") {
+    Container(LinkedInAds, "LinkedIn Ads", "Initial Infection Vector", "Delivers malware via LinkedIn Ads.")
+    Container(MalwareExecution, "Malware Execution", "Executable", "Executes and installs on the victim's machine.")
+}
+
+Deployment_Node(Victim, "Victim's Network", "Targeted User", $sprite="user_shield,color=#00ff00") {
+    Container(VictimPC, "Victim's PC", "Infection Point", "Where the malware gets executed.")
+    Container(FacebookData, "Facebook Data", "Data Exfiltration", "Data targeted by the malware.")
+    Container(TokenExchange, "Token Exchange", "Privilege Escalation", "Exchange tokens for higher privileges.", $sprite="key,color=#ff9900")
+    Container(AdminAccess, "Admin Access", "Facebook AdsManager", "Gaining Admin access to Facebook AdsManager.", $sprite="user_tie,color=#ff9900")
+}
+
+Deployment_Node(CloudServices, "Cloud Services", "C&C Server & Data Storage", $sprite="cloud,color=#0000ff") {
+    Container(CCServer, "C&C Server", "Command & Control", "Receives data and sends commands.")
+    Container(DataStorage, "Data Storage", "Stolen Data Repository", "Stores exfiltrated data.")
+}
+
+' Define relationships
+Rel(LinkedInAds, MalwareExecution, "Deliver Malware")
+Rel(MalwareExecution, VictimPC, "Install & Execute")
+Rel(VictimPC, FacebookData, "Extract Credentials")
+Rel(FacebookData, TokenExchange, "Token Extraction")
+Rel(TokenExchange, AdminAccess, "Gain Admin Access")
+Rel(AdminAccess, CCServer, "Control & Commands")
+Rel(CCServer, DataStorage, "Store Data")
+
+' Additional elements based on source code
+ContainerDb(VictimDB, "Victim's Browser DB", "SQLite", "Stores credit card & browsing history data.")
+
+Rel(VictimPC, VictimDB, "Access Data", "SQL Queries")
+Rel(VictimDB, CCServer, "Exfiltrate Data")
+@enduml
